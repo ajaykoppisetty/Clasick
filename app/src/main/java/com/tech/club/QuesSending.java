@@ -68,7 +68,7 @@ public class QuesSending extends AppCompatActivity implements View.OnClickListen
         grp_list=(ListView)findViewById(R.id.grp_list);
 
 
-        /*ParseQuery<ParseObject> query=ParseQuery.getQuery("Group");
+        ParseQuery<ParseObject> query=ParseQuery.getQuery("Group");
         query.whereEqualTo("members", ParseUser.getCurrentUser());
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -96,7 +96,7 @@ public class QuesSending extends AppCompatActivity implements View.OnClickListen
 
                 }
             }
-        });*/
+        });
 
 
     }
@@ -144,12 +144,12 @@ public class QuesSending extends AppCompatActivity implements View.OnClickListen
 
 
 
-        if (question != null && !question.isEmpty() /*&& cheked_grp!=null*/) {
+        if (question != null && !question.isEmpty() && cheked_grp!=null) {
             final ParseObject testObject = new ParseObject("Ques");
             testObject.put("question", question);
             testObject.put("User", asked_by);
             testObject.put("answer", number);
-           /* testObject.put("group",cheked_grp);*/
+            testObject.put("group",cheked_grp);
 
             ParseQuery<ParseUser> query = ParseUser.getQuery();
             query.include("Profile");

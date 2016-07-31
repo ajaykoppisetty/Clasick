@@ -18,5 +18,6 @@ public class ClassifyApplication extends Application {
 
         Parse.initialize(this, "4rIpmaO8yCdDk5z1ICy8BpHfqPaqOto7s5RoRIvO", "ab933k57jjfidHyOgQGzZHQQ0vfzxejB5XBz5WhJ");
 
+
     }
 }

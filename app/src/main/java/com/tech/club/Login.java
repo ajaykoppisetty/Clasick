@@ -23,12 +23,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
+
+import java.util.List;
 
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
@@ -50,10 +53,16 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         loginbutton = (Button) findViewById(R.id.Loginbut);
         loginbutton.setOnClickListener(this);
+
+
         signUp = (Button) findViewById(R.id.signup);
         signUp.setOnClickListener(this);
+
+
         forgotbutton = (Button) findViewById(R.id.forgot);
         forgotbutton.setOnClickListener(this);
+
+
         mainContent=(RelativeLayout)findViewById(R.id.main_content);
 
 
@@ -72,6 +81,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         if (loggedIn)
             startActivity(new Intent(this, MainActivity.class));
+
 
 
     }

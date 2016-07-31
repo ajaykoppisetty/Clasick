@@ -12,27 +12,22 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.FindCallback;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
@@ -41,12 +36,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.regex.Pattern;
 
 import Fragments.DashboardFragment;
 
 
-public class GettingFiles extends AppCompatActivity {
+public class GettingFiles extends ActionBarActivity {
 
     Button bt_choose, bt_upload;
     private ProgressDialog pDialog;
@@ -54,14 +49,11 @@ public class GettingFiles extends AppCompatActivity {
     String title="";
     byte[] file_to_be_uploaded;
     final int PICKFILE_RESULT_CODE = 34;
-    private static final int FILE_SELECT_CODE = 0;
     LinearLayout about_file;
     ImageView iv;
     TextView tv;
     String filename = " ";
     String format = " ";
-    private ListView grp_list;
-    private String cheked_grp;
 
 
     @Override
@@ -80,65 +72,25 @@ public class GettingFiles extends AppCompatActivity {
         about_file= (LinearLayout) findViewById(R.id.about_file);
         iv=(ImageView)findViewById(R.id.about_image);
         tv=(TextView)findViewById(R.id.about_text);
-        grp_list=(ListView)findViewById(R.id.file_grp_list);
-
-       /* ParseQuery<ParseObject> query=ParseQuery.getQuery("Group");
-        query.whereEqualTo("members", ParseUser.getCurrentUser());
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                if (e == null && list.size() > 0) {
-
-                    String user_groups[] = new String[list.size()];
-                    for (int i = 0; i < list.size(); i++) {
-                        user_groups[i]=list.get(i).getString("name");
-                    }
-                    ArrayAdapter<String> adapter=new ArrayAdapter<String>(GettingFiles.this,android.R.layout.simple_list_item_multiple_choice,user_groups);
-                    grp_list.setAdapter(adapter);
-                    grp_list.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-                    grp_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            grp_list.setItemChecked(position,true);
-                            cheked_grp=((TextView) view).getText().toString();
-
-                        }
-                    });
-                }
-
-                else{
-
-                }
-            }
-        });
-*/
-
-
 
         bt_choose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
 
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*");
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-                try {
-                    startActivityForResult(
-                            Intent.createChooser(intent, "Select a File to Upload"),
-                            FILE_SELECT_CODE);
-                } catch (android.content.ActivityNotFoundException ex) {
-                    // Potentially direct the user to the Market with a Dialog
-                    Toast.makeText(GettingFiles.this, "Please install a File Manager.",
-                            Toast.LENGTH_SHORT).show();
-                }
+                new MaterialFilePicker()
+                        .withActivity(GettingFiles.this)
+                        .withRequestCode(PICKFILE_RESULT_CODE)
+                        .withFilter(Pattern.compile(".*"))
+                        // Filtering files and directories by file name using regexp
+                        .withFilterDirectories(false) // Set directories filterable (false by default)
+                        .start();
 
 
-                /*Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+             /*   Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("file*//*");
-                startActivityForResult(intent, PICKFILE_RESULT_CODE);
-*/
+                startActivityForResult(intent, PICKFILE_RESULT_CODE);*/
+
             }
         });
 
@@ -147,12 +99,10 @@ public class GettingFiles extends AppCompatActivity {
         bt_upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                title = ETtitle.getText().toString();
+                title=ETtitle.getText().toString();
 
 
                 if(file_to_be_uploaded!=null){
-
-
                     if((title.length()>0))
                     {
                         uploadfile();
@@ -184,7 +134,7 @@ public class GettingFiles extends AppCompatActivity {
         BitmapDrawable bdrawable = (BitmapDrawable) drawable;
         Bitmap icon = bdrawable.getBitmap();
 
-        Intent notify = new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent notify = new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, notify,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -194,63 +144,62 @@ public class GettingFiles extends AppCompatActivity {
         final NotificationManager mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
                 GettingFiles.this);
-                mBuilder.setContentTitle("Clasick")
+        mBuilder.setContentTitle("Clasick")
                 .setContentText("File upload in progress.").setLargeIcon(icon)
                 .setContentIntent(pIntent)
                 .setSmallIcon(R.drawable.ic_stat_extra);
-                 mBuilder.setOngoing(true);
+        mBuilder.setOngoing(true);
 
 
 
-            ParseFile file = new ParseFile(filename, file_to_be_uploaded);
-            file.saveInBackground(new ProgressCallback() {
-                @Override
-                public void done(Integer integer) {
+        ParseFile file = new ParseFile(filename, file_to_be_uploaded);
+        file.saveInBackground(new ProgressCallback() {
+            @Override
+            public void done(Integer integer) {
 
-                    mBuilder.setProgress(100, integer * 5, false);
+                mBuilder.setProgress(100, integer * 5, false);
+                mNotifyManager.notify(id, mBuilder.build());
+
+            }
+        });
+
+
+        ParseObject testobject = new ParseObject("Upload");
+        testobject.put("data", file);
+        testobject.put("title", title);
+        testobject.put("User", upload_by);
+        testobject.put("fileName",filename);
+
+
+        testobject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+
+
+                if (e == null) {
+
+                    mBuilder.setContentText("Upload complete")
+                            .setProgress(0, 0, false);
+                    mBuilder.setOngoing(false);
+                    mBuilder.setAutoCancel(true);
                     mNotifyManager.notify(id, mBuilder.build());
-
-                }
-            });
+                    Toast.makeText(GettingFiles.this, "Uploading completed.", Toast.LENGTH_SHORT).show();
 
 
-            ParseObject testobject = new ParseObject("Upload");
-            testobject.put("data", file);
-            testobject.put("title", title);
-            testobject.put("User", upload_by);
-            testobject.put("fileName",filename);
-            testobject.put("group",cheked_grp);
-
-
-            testobject.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-
-
-                    if (e == null) {
-
-                        mBuilder.setContentText("Upload complete")
-                                .setProgress(0, 0, false);
-                        mBuilder.setOngoing(false);
-                        mBuilder.setAutoCancel(true);
-                        mNotifyManager.notify(id, mBuilder.build());
-                        Toast.makeText(GettingFiles.this, "Uploading completed.", Toast.LENGTH_SHORT).show();
-
-
-                    } else {
-                        mBuilder.setContentText("Failed to upload.")
-                                // Removes the progress bar
-                                .setProgress(0, 0, false);
-                        mBuilder.setOngoing(false);
-                        mBuilder.setAutoCancel(true);
-                      mNotifyManager.notify(id, mBuilder.build());
-                 Toast.makeText(GettingFiles.this, "Uploading failed.", Toast.LENGTH_SHORT).show();
-                    }
-
-
+                } else {
+                    mBuilder.setContentText("Failed to upload.")
+                            // Removes the progress bar
+                            .setProgress(0, 0, false);
+                    mBuilder.setOngoing(false);
+                    mBuilder.setAutoCancel(true);
+                    mNotifyManager.notify(id, mBuilder.build());
+                    Toast.makeText(GettingFiles.this, "Uploading failed.", Toast.LENGTH_SHORT).show();
                 }
 
-            });
+
+            }
+
+        });
 
 
 
@@ -287,18 +236,18 @@ public class GettingFiles extends AppCompatActivity {
 
 
 
-        switch (requestCode) {
-            case FILE_SELECT_CODE:
+
+        if (requestCode == PICKFILE_RESULT_CODE) {
 
 
             if (resultCode == RESULT_OK) {
 
-               String file_path = data.getData().getPath();
-               format = file_path.substring(file_path.lastIndexOf(".")+1);
-               filename=file_path.substring(file_path.lastIndexOf("/")+1);
+                String file_path = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+                format = file_path.substring(file_path.lastIndexOf(".")+1);
+                filename=file_path.substring(file_path.lastIndexOf("/")+1);
 
                 if(filename.length()>0)
-                 tv.setText(filename);
+                    tv.setText(filename);
 
 
 
@@ -362,7 +311,7 @@ public class GettingFiles extends AppCompatActivity {
 
 
 
-              }
+            }
         }
     }
 

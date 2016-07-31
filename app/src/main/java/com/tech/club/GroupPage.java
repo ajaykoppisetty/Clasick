@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.parse.CountCallback;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
@@ -55,6 +56,7 @@ public class GroupPage extends AppCompatActivity {
     private boolean joined;
     private ListView ques_list;
     private ListView upload_list;
+    private TextView query2_c;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class GroupPage extends AppCompatActivity {
        fab=(FloatingActionButton)findViewById(R.id.join_fab);
         bt_edit_desc=(Button)findViewById(R.id.edit_desc);
         descript=(TextView)findViewById(R.id.wr_desc);
+      /*  query2_c=(TextView)findViewById(R.id.query_c);*/
 
 
         Intent intent = getIntent();
@@ -141,6 +144,17 @@ public class GroupPage extends AppCompatActivity {
                    Toast.makeText(GroupPage.this, "dbd", Toast.LENGTH_SHORT).show();
            }
        });
+
+
+       /* ParseQuery<ParseObject> ques_query=ParseQuery.getQuery("Ques");
+        ques_query.whereEqualTo("group",grp_name);
+        ques_query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+           int n=list.size();
+                query2_c.setText(n);
+            }
+        });*/
 
 
        /* ParseQuery<ParseObject> ques_query=ParseQuery.getQuery("Ques");

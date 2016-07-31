@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.Parse;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
@@ -45,22 +46,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
 
-        profile =(ImageView)findViewById(R.id.profile_pic);
+        profile =(ImageView) navigationView.getHeaderView(0).findViewById(R.id.profile_pic);
 
         DisplayImage.retreiveprofile(ParseUser.getCurrentUser().getUsername(), MainActivity.this);
 
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        User = (TextView) findViewById(R.id.current_user);
+        User = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.current_user);
         User.setText(ParseUser.getCurrentUser().getUsername());
 
-        designation = (TextView) findViewById(R.id.current_desig);
+        designation = (TextView) navigationView.getHeaderView(0).findViewById(R.id.current_desig);
 
 
         SharedPreferences sp = getSharedPreferences("login_pref", Context.MODE_PRIVATE);
@@ -84,6 +87,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         abdt.syncState();
 
 
+        installupdate();
+
+    }
+
+    private void installupdate() {
+        ParseInstallation pinst= ParseInstallation.getCurrentInstallation();
+        ParseUser puser=ParseUser.getCurrentUser();
+        if(puser!=null){
+            pinst.put("username",puser.getUsername());
+            pinst.saveInBackground();
+        }
     }
 
     /*private void setupDrawerContent(NavigationView navigationView) {
@@ -124,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         abdt.onConfigurationChanged(newConfig);
     }
 
+
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
 
@@ -159,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (menuItem.getItemId() == R.id.nav_logout) {
 
             ParseUser.getCurrentUser().logOutInBackground();
+
             SharedPreferences sp = getSharedPreferences("login_pref", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sp.edit();
             editor.putBoolean("logged_in", false);

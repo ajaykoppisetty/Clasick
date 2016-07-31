@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -24,6 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -40,6 +43,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 
 import org.w3c.dom.Text;
@@ -72,12 +76,11 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
     private ProgressDialog pdialog;
     private String mr_user;
     private DrawerLayout drawerLayout;
+    private ProgressDialog mProgressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_ques, container, false);
-
-
 
 
 
@@ -127,14 +130,14 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
         super.onViewCreated(view, savedInstanceState);
         // retreive the questions from the parse
 
-       run_once();
+        run_once();
     }
 
     public void run_once(){
         if(first_run){
-                QAworks.retreiveQuestions(context);
-                first_run=false;
-            }
+            QAworks.retreiveQuestions(context);
+            first_run=false;
+        }
 
         QAworks.retreiveQuestionsLocally(context);
         QAworks.retreiveQuestions(context);
@@ -143,6 +146,7 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
     }
 
     public void upload_ques() {
+
         startActivity(new Intent(getActivity(), QuesSending.class));
     }
 
@@ -227,7 +231,7 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 
 
         if (sgQuestionsArrayList != null) {
@@ -250,41 +254,93 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                if(which==0) {
-                    pdialog = new ProgressDialog(getActivity());
-                    pdialog.setCancelable(false);
-                    pdialog.setMessage("deleting..");
-                    pdialog.show();
+                    if(which==0) {
+                        pdialog = new ProgressDialog(getActivity());
+                        pdialog.setCancelable(false);
+                        pdialog.setMessage("deleting..");
+                        pdialog.show();
 
-                    ParseQuery<ParseObject> query = ParseQuery.getQuery("Ques");
+                        ParseQuery<ParseObject> query = ParseQuery.getQuery("Ques");
 
-                    query.whereEqualTo("objectId", questionsObjectId);
-                    query.findInBackground(new FindCallback<ParseObject>() {
-                        @Override
-                        public void done(List<ParseObject> parseObjects, ParseException e) {
-                            if (e == null) {
-                                for (ParseObject delete : parseObjects) {
-                                    delete.deleteInBackground(new DeleteCallback() {
-                                        @Override
-                                        public void done(ParseException e) {
-                                            if (e == null) {
-                                                onRefresh();
-                                                pdialog.dismiss();
-                                                QAworks.refreshQuestions(getActivity());
-                                                Snackbar.make(mainContent, "Deleted", Snackbar.LENGTH_SHORT).show();
-                                            } else
-                                            pdialog.dismiss();
+                        query.whereEqualTo("objectId", questionsObjectId);
+                        query.findInBackground(new FindCallback<ParseObject>() {
+                            @Override
+                            public void done(List<ParseObject> parseObjects, ParseException e) {
+                                if (e == null) {
+                                    for (ParseObject delete : parseObjects) {
+                                        delete.deleteInBackground(new DeleteCallback() {
+                                            @Override
+                                            public void done(ParseException e) {
+                                                if (e == null) {
+                                                    onRefresh();
+                                                    pdialog.dismiss();
+                                                    QAworks.refreshQuestions(getActivity());
+                                                    Snackbar.make(mainContent, "Deleted", Snackbar.LENGTH_SHORT).show();
+                                                } else
+                                                    pdialog.dismiss();
                                                 Snackbar.make(mainContent, " Not Deleted", Snackbar.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
+                                            }
+                                        });
+                                    }
 
+                                }
                             }
-                        }
-                    });
-                }
+                        });
+                    }
                     if (which==1){
-                        Snackbar.make(mainContent,"Update still in progress",Snackbar.LENGTH_SHORT).show();
+
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+                        alertDialog.setTitle("Edit");
+
+                        final EditText input = new EditText(context);
+                        FrameLayout container = new FrameLayout(context);
+                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params.leftMargin = 30;
+                        params.rightMargin = 50;
+                        input.setLayoutParams(params);
+
+
+                        String puttingText =sgQuestionsArrayList.get(position).getQuestion();
+
+                        input.setText(puttingText);
+                        input.setTextColor(Color.parseColor("#303030"));
+                        input.setSelection(puttingText.length());
+                        input.requestFocus();
+
+                        container.addView(input);
+
+
+                        alertDialog.setView(container);
+                        alertDialog.setPositiveButton("Done",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        dialog.cancel();
+
+                                        mProgressDialog = new ProgressDialog(getActivity());
+
+                                        mProgressDialog.setMessage("Working...");
+                                        mProgressDialog.setCancelable(false);
+                                        mProgressDialog.show();
+
+                                        String newPuttingText = input.getText().toString();
+
+                                        editQuestion(position, sgQuestionsArrayList.get(position).getObject_id(), newPuttingText);
+
+
+                                    }
+                                });
+
+                        alertDialog.setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // Write your code here to execute after dialog
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        alertDialog.show();
+
 
                     }
 
@@ -320,6 +376,52 @@ public class Ques extends Fragment implements SwipeRefreshLayout.OnRefreshListen
         }
 
         return true;
+    }
+
+    private void editQuestion(final int position, String object_id, final String newPuttingText) {
+
+        ParseQuery<ParseObject> parseQuery=ParseQuery.getQuery("Ques");
+        parseQuery.getInBackground(object_id, new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject parseObject, ParseException e) {
+
+                if (e==null && parseObject!=null) {
+
+                    parseObject.put("question", newPuttingText);
+                    parseObject.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+
+                            if (e == null) {
+
+
+
+                                mProgressDialog.dismiss();
+                                sgQuestionsArrayList.get(position).setQuestion(newPuttingText);
+                                adapter.notifyDataSetChanged();
+                                showSnackBar("Done");
+
+                            } else {
+                                //Can't Save
+
+                                mProgressDialog.dismiss();
+                                showSnackBar(e.getMessage());
+                            }
+                        }
+                    });
+
+                }else{
+                    mProgressDialog.dismiss();
+                    showSnackBar(e.getMessage());
+                }
+
+
+            }
+        });
+    }
+
+    private void showSnackBar(String done) {
+        Snackbar.make(mainContent,done,Snackbar.LENGTH_SHORT).show();
     }
 
 }

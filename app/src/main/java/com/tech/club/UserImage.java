@@ -218,8 +218,6 @@ public class UserImage extends AppCompatActivity {
                             }
                         });
 
-
-                        Toast.makeText(UserImage.this, "need to proceed to next activity by saving the obtained data or enter an image which is not worthy" , Toast.LENGTH_SHORT).show();
                     }
                 }
             }

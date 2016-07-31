@@ -195,11 +195,12 @@ public class ClassifyGroups extends AppCompatActivity {
                     search_bar.setVisibility(View.VISIBLE);
 
                     ParseQuery<ParseObject> query = ParseQuery.getQuery("Group");
-                    query.whereEqualTo("name", to_search);
+                    query.whereContains("name", to_search);
                     query.getFirstInBackground(new GetCallback<ParseObject>() {
                         @Override
                         public void done(ParseObject parseObject, ParseException e) {
                             if (e == null) {
+                                to_search= parseObject.getString("name");
                                 tv_searched.setText(to_search);
                                 search_bar.setVisibility(View.INVISIBLE);
                                 cv_searchresult.setOnClickListener(new View.OnClickListener() {

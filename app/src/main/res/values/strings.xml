@@ -31,5 +31,7 @@
     <string name="title_activity_group">GroupActivity</string>
     <string name="title_activity_group_page">GroupPage</string>
     <string name="title_activity_group_members">Members</string>
+    <string name="title_activity_list">list</string>
+    <string name="title_activity_listing">listing</string>
 
 </resources>

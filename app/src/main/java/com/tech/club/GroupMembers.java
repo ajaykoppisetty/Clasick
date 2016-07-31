@@ -2,8 +2,6 @@ package com.tech.club;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -11,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -25,6 +22,7 @@ public class GroupMembers extends AppCompatActivity {
 
     private String grp_name;
     private ListView list_member;
+    private String grp_admin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +46,9 @@ public class GroupMembers extends AppCompatActivity {
         query.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject parseObject, ParseException e) {
+
+                grp_admin=parseObject.getString("admin");
+
                 ParseRelation<ParseObject> relation = parseObject.getRelation("members");
                 ParseQuery<ParseObject> query1 = relation.getQuery();
                 query1.findInBackground(new FindCallback<ParseObject>() {
@@ -70,6 +71,9 @@ public class GroupMembers extends AppCompatActivity {
                                     startActivity(intent);
                                 }
                             });
+
+
+
                         } else {
 
                         }
